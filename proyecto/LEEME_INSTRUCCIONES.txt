@@ -1,103 +1,93 @@
 ========================================================================
-  TABLERO DE CONTROL Y BITÁCORA DE RUTAS (PHP PURO - SIN NODE.JS)
-  SOPORTE MULTI-CEDIS: VISTA GERENCIAL Y PANTALLAS DEDICADAS POR TV
+  TABLERO DE CONTROL Y MONITOREO DE DISTRIBUCIÓN
+  SOPORTE MULTI-CEDIS: PANTALLAS DE ALMACÉN Y CONSOLA GERENCIAL
 ========================================================================
 
-¡Hola! Esta carpeta contiene todo el sistema listo para funcionar en cualquier 
-servidor con PHP (XAMPP, WAMP, Laragon, IIS o Apache en Linux/Windows).
-
-NO REQUIERE INSTALAR NODE.JS, NI NPM, NI COMPILADORES.
-Simplemente copia esta carpeta completa "proyecto" a tu servidor web.
+Sistema corporativo de monitoreo operativo de rutas y distribución.
+Compatible con cualquier servidor web con soporte PHP estándar 
+(Apache, IIS, XAMPP, WAMP, Laragon en Windows o Linux).
 
 ------------------------------------------------------------------------
-1. ¿CÓMO PONERLO EN UNA TV PARA QUE SOLO MIREN SU CEDIS? (EJ. OBREGÓN)
+1. CONFIGURACIÓN DE PANTALLAS DEDICADAS POR CEDIS
 ------------------------------------------------------------------------
-Ya creamos las subcarpetas listas para cada CEDIS. En el navegador de la Smart TV 
-o mini-PC de cada almacén, solo abre la URL correspondiente:
+Cada sucursal cuenta con su propia carpeta lista para abrir en la Smart TV
+o equipo asignado en almacén:
 
-  📍 TV en Almacén Obregón:
+  📍 TV Almacén Ciudad Obregón:
      http://tu-servidor/proyecto/obregon/
      (Muestra exclusivamente las rutas de la serie 100 de Obregón)
 
-  📍 TV en Almacén Hermosillo:
+  📍 TV Almacén Hermosillo:
      http://tu-servidor/proyecto/hermosillo/
      (Muestra exclusivamente las rutas de la serie 200 de Hermosillo)
 
-  📍 TV en Almacén Navojoa:
+  📍 TV Almacén Navojoa:
      http://tu-servidor/proyecto/navojoa/
      (Muestra exclusivamente las rutas de la serie 300 de Navojoa)
 
-  📍 TV en Almacén Nogales:
+  📍 TV Almacén Nogales:
      http://tu-servidor/proyecto/nogales/
      (Muestra exclusivamente las rutas de la serie 400 de Nogales)
 
-  📍 TV en Almacén Caborca:
+  📍 TV Almacén Caborca:
      http://tu-servidor/proyecto/caborca/
      (Muestra exclusivamente las rutas de la serie 500 de Caborca)
 
-  📍 TV en Almacén Guaymas:
+  📍 TV Almacén Guaymas:
      http://tu-servidor/proyecto/guaymas/
      (Muestra exclusivamente las rutas de la serie 600 de Guaymas)
 
-  🌐 PANTALLA DEL GERENTE GENERAL (VER TODO):
+  🌐 PANTALLA GERENCIAL GENERAL (RED COMPLETA):
      http://tu-servidor/proyecto/
-     (Muestra todas las 6 plazas en cuadrícula ejecutiva, y cuenta con
-      el selector arriba para cambiar a cualquier CEDIS con 1 clic).
+     (Muestra la red estatal consolidada con gráficas ejecutivas y selector
+      inmediato para cambiar a cualquier plaza).
 
 ------------------------------------------------------------------------
-2. TEMA CLARO DE ALTA VISIBILIDAD PARA OFICINAS Y BODEGAS
+2. TEMA CORPORATIVO CLARO Y GRÁFICAS DE DISTRIBUCIÓN
 ------------------------------------------------------------------------
-El tablero cuenta con el TEMA CLARO profesional:
-  - Tarjetas blancas limpias con bordes definidos y sombras sutiles.
-  - Tipografía en contraste negro/slate oscuro (ultra legible a 5 metros de distancia).
+El tablero integra diseño de alta visibilidad para monitores industriales:
+  - Nivel superior con tarjetas de estado de cada plaza y mini-barras.
+  - Nivel inferior con gráficas de barras comparativas y consolidado estatal 
+    para aprovechar al 100% el alto de pantallas 1080p y 4K.
   - Indicadores con código de color:
-      * Verde: Rutas liquidadas con éxito.
+      * Verde: Rutas liquidadas con éxito y metas cumplidas.
       * Azul: Rutas activas en itinerario normal.
-      * Rojo: Rutas con alerta "Sin Licencia" o incidencias.
-      * Ámbar: Unidades en almacén o con observaciones.
+      * Rojo: Alertas de operador ("Sin Licencia") o incidencias.
+      * Ámbar: Unidades en almacén o pendientes.
 
 ------------------------------------------------------------------------
-3. TU LOGOTIPO REAL Y FAVICON AUTOMÁTICO
+3. LOGOTIPO INSTITUCIONAL Y FAVICON AUTOMÁTICO
 ------------------------------------------------------------------------
-Para que el tablero use tu logotipo real de la empresa y lo ponga como favicon
-en la pestaña del navegador:
-  1. Guarda tu imagen con el nombre exacto: logo.png
-  2. Pégala directamente dentro de esta carpeta "proyecto" (junto a index.php).
-  3. ¡Listo! Tanto la vista gerencial como todas las carpetas de CEDIS
-     detectarán tu logo.png y lo aplicarán de inmediato.
+Para usar el logotipo oficial de la empresa:
+  1. Guarda tu imagen con el nombre: logo.png
+  2. Colócala en la carpeta raíz "proyecto".
+  3. El sistema la tomará automáticamente en todas las pantallas y como favicon.
 
 ------------------------------------------------------------------------
-4. CONTROLES PARA SMART TV Y PANTALLAS
+4. CONTROLES DE PANTALLA
 ------------------------------------------------------------------------
-  - Botón "⛶": Activa Pantalla Completa en la TV ocultando barras de navegador.
-  - Zoom TV: Botones rápidos (100%, 115%, 130%) para agrandar números según la
-    distancia a la que esté colocada la televisión.
-  - Auto-Scroll inteligente: En la Bitácora no cambia de pantalla hasta que
-    baje por todas las unidades y dé una pausa para los supervisores.
+  - Botón "⛶": Activa Pantalla Completa en la TV ocultando la barra del navegador.
+  - Zoom TV: Selectores rápidos (100%, 115%, 130%) según la distancia de lectura.
+  - Auto-desplazamiento continuo: En la Bitácora recorre todas las unidades de 
+    arriba hacia abajo antes de pasar a las pantallas analíticas.
 
 ------------------------------------------------------------------------
 5. ESTRUCTURA DE ARCHIVOS
 ------------------------------------------------------------------------
   proyecto/
-  ├── index.php                 <- Tablero Principal / Gerente General
-  ├── obregon/
-  │   └── index.php             <- Pantalla TV dedicada para Cd. Obregón
-  ├── hermosillo/
-  │   └── index.php             <- Pantalla TV dedicada para Hermosillo
-  ├── navojoa/
-  │   └── index.php             <- Pantalla TV dedicada para Navojoa
-  ├── nogales/
-  │   └── index.php             <- Pantalla TV dedicada para Nogales
-  ├── caborca/
-  │   └── index.php             <- Pantalla TV dedicada para Caborca
-  ├── guaymas/
-  │   └── index.php             <- Pantalla TV dedicada para Guaymas
-  ├── conexion.php              <- Configuración de SQL Server (172.16.60.12\SQLSVR)
-  ├── api_bitacora.php          <- API de rutas y odómetros
+  ├── index.php                 <- Consola Gerencial / Red Completa
+  ├── obregon/index.php         <- Enlace dedicado TV Obregón
+  ├── hermosillo/index.php      <- Enlace dedicado TV Hermosillo
+  ├── navojoa/index.php         <- Enlace dedicado TV Navojoa
+  ├── nogales/index.php         <- Enlace dedicado TV Nogales
+  ├── caborca/index.php         <- Enlace dedicado TV Caborca
+  ├── guaymas/index.php         <- Enlace dedicado TV Guaymas
+  ├── conexion.php              <- Parámetros de base de datos
+  ├── api_bitacora.php          <- API de odómetros y horarios
   ├── api_visitas.php           <- API de visitas y efectividad
   ├── api_litros.php            <- API de proyección de litros
-  ├── api_litros_vendidos.php   <- API de ventas reales por familia
+  ├── api_litros_vendidos.php   <- API de ventas por familia
   ├── api_cancelaciones.php     <- API de cancelaciones e incidencias
-  ├── logo-yaqui.svg            <- Logo vector de respaldo
-  └── LEEME_INSTRUCCIONES.txt   <- Esta guía
+  ├── logo-yaqui.svg            <- Logotipo vectorial de respaldo
+  └── LEEME_INSTRUCCIONES.txt   <- Esta guía técnica
 ========================================================================

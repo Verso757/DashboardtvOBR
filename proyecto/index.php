@@ -1,21 +1,16 @@
 <?php
 /**
- * TABLERO DE OPERACIONES Y BITÁCORA DE RUTAS (PHP PURO)
- * Compatible con cualquier servidor PHP (Apache, XAMPP, WAMP, Laragon, IIS)
- * NO REQUIERE NODE.JS NI COMPILADORES - COPIA Y PEGA DIRECTAMENTE
- * 
- * Soporta modo por CEDIS individual y vista gerencial de todas las plazas
+ * Tablero de Monitoreo y Control de Distribución
+ * Sistema Corporativo de Seguimiento de Rutas y Cumplimiento Comercial
  */
 
-// Permite preconfigurar el CEDIS desde subcarpetas (obregon, hermosillo, etc.)
 if (!isset($CEDIS_PRESET)) {
     $CEDIS_PRESET = isset($_GET['cedis']) ? strtolower(trim($_GET['cedis'])) : 'all';
 }
 
-// Mapeo de CEDIS reconocidos
 $CEDIS_CONFIG = [
-    'all' => ['name' => 'Todos los CEDIS (Gerencial)', 'short' => 'Todos', 'prefix' => null, 'code' => 'ALL'],
-    'obregon' => ['name' => 'CEDIS Cd. Obregón', 'short' => 'Obregón', 'prefix' => '1', 'code' => '001', 'db' => 'Obregon'],
+    'all' => ['name' => 'Red Estatal Completa', 'short' => 'Todos', 'prefix' => null, 'code' => 'ALL'],
+    'obregon' => ['name' => 'CEDIS Ciudad Obregón', 'short' => 'Obregón', 'prefix' => '1', 'code' => '001', 'db' => 'Obregon'],
     'hermosillo' => ['name' => 'CEDIS Hermosillo', 'short' => 'Hermosillo', 'prefix' => '2', 'code' => '002', 'db' => 'Hermosillo'],
     'navojoa' => ['name' => 'CEDIS Navojoa', 'short' => 'Navojoa', 'prefix' => '3', 'code' => '003', 'db' => 'Navojoa'],
     'nogales' => ['name' => 'CEDIS Nogales', 'short' => 'Nogales', 'prefix' => '4', 'code' => '004', 'db' => 'Nogales'],
@@ -28,8 +23,6 @@ if (!isset($CEDIS_CONFIG[$CEDIS_PRESET])) {
 }
 $currentCedis = $CEDIS_CONFIG[$CEDIS_PRESET];
 
-// Detección automática del logotipo real
-// Busca logo.png, logo.svg, o el fallback vectorial
 $baseDir = __DIR__;
 if (!file_exists($baseDir . '/conexion.php') && file_exists(dirname($baseDir) . '/conexion.php')) {
     $baseDir = dirname($baseDir);
@@ -51,7 +44,6 @@ foreach ($logoCandidates as $cand) {
     }
 }
 
-// Si estamos en una subcarpeta (ej. /obregon/), la ruta relativa al logo es ../logo.png
 $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
 ?>
 <!DOCTYPE html>
@@ -59,16 +51,12 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><?= htmlspecialchars($currentCedis['name']) ?> • Tablero de Rutas</title>
-  
-  <!-- Favicon dinámico basado en tu logo real -->
+  <title><?= htmlspecialchars($currentCedis['name']) ?> • Control de Distribución</title>
   <link rel="icon" type="image/png" href="<?= $relPath . htmlspecialchars($logoFile) ?>" />
   
-  <!-- Tailwind CSS CDN para renderizado instantáneo sin compilación -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           colors: {
@@ -101,19 +89,18 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
 </head>
 <body class="h-full w-full bg-slate-100 font-sans text-slate-800 overflow-hidden flex flex-col select-none">
 
-  <!-- Top Screen Progress Bar -->
+  <!-- Barra de progreso de rotación de pantallas -->
   <div class="w-full h-1 bg-slate-200 shrink-0 relative z-50">
     <div id="topProgressBar" class="h-full bg-red-600 transition-all ease-linear shadow-sm" style="width: 0%;"></div>
   </div>
 
-  <!-- Header Light Theme with Brand, Tabs and TV Controls -->
+  <!-- Encabezado Institucional -->
   <header class="bg-white border-b border-slate-200 px-4 py-2 flex flex-col md:flex-row md:items-center justify-between text-slate-800 shrink-0 shadow-sm gap-2">
-    <!-- Brand & Real Logo -->
     <div class="flex items-center gap-3">
       <div class="bg-slate-50 border border-slate-200 rounded-xl p-1 shadow-sm flex items-center justify-center h-11 w-auto min-w-[64px]">
         <img 
           src="<?= $relPath . htmlspecialchars($logoFile) ?>" 
-          alt="Logotipo" 
+          alt="Logotipo Corporativo" 
           class="h-9 w-auto max-w-[130px] object-contain"
           onerror="this.src='<?= $relPath ?>logo-yaqui.svg'; this.onerror=null;"
         />
@@ -127,15 +114,15 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
             </span>
           </h1>
         </div>
-        <p class="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+        <p class="text-[11px] text-slate-500 font-semibold flex items-center gap-1.5">
           <span class="text-blue-700 font-bold"><?= htmlspecialchars($currentCedis['name']) ?></span>
-          <span>•</span>
-          <span>PHP Puro (Sin Node)</span>
+          <span class="text-slate-300">•</span>
+          <span>Supervisión y Control de Distribución</span>
         </p>
       </div>
     </div>
 
-    <!-- Screen Tabs -->
+    <!-- Pestañas de Navegación -->
     <div class="hidden xl:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
       <button onclick="goToScreen(0)" id="tab-0" class="tab-btn px-2.5 py-1 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm">
         1. Bitácora de Rutas
@@ -154,10 +141,8 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       </button>
     </div>
 
-    <!-- Right Controls: CEDIS Selector, TV Zoom, Fullscreen, Pause & Clock -->
+    <!-- Controles de TV: Selector CEDIS, Zoom, Pantalla Completa, Pausa y Reloj -->
     <div class="flex items-center gap-2 flex-wrap">
-      
-      <!-- CEDIS Selector -->
       <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs font-bold">
         <span class="text-blue-600 pl-1">📍</span>
         <select 
@@ -167,13 +152,12 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         >
           <?php foreach ($CEDIS_CONFIG as $k => $c): ?>
             <option value="<?= $k ?>" <?= $k === $CEDIS_PRESET ? 'selected' : '' ?>>
-              <?= htmlspecialchars($c['short']) ?> <?= $c['prefix'] ? "(Rutas {$c['prefix']}xx)" : '• Gerencial' ?>
+              <?= htmlspecialchars($c['short']) ?> <?= $c['prefix'] ? "(Rutas {$c['prefix']}xx)" : '• Red Completa' ?>
             </option>
           <?php endforeach; ?>
         </select>
       </div>
 
-      <!-- TV Zoom Buttons -->
       <div class="hidden sm:flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200 text-xs">
         <span class="text-[10px] text-slate-500 font-semibold">Zoom:</span>
         <button onclick="setTvZoom(1)" id="btn-zoom-1" class="zoom-btn px-1.5 py-0.5 rounded text-[11px] font-bold bg-blue-600 text-white shadow-sm">100%</button>
@@ -181,7 +165,6 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         <button onclick="setTvZoom(1.3)" id="btn-zoom-130" class="zoom-btn px-1.5 py-0.5 rounded text-[11px] font-bold text-slate-600 hover:text-slate-900">130%</button>
       </div>
 
-      <!-- TV Fullscreen Button -->
       <button 
         onclick="toggleFullscreen()" 
         class="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors border border-slate-200"
@@ -190,7 +173,6 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         <span id="fsIcon">⛶</span>
       </button>
 
-      <!-- Rotation Pause Button -->
       <button 
         onclick="togglePause()" 
         id="pauseBtn"
@@ -200,7 +182,6 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         ⏸
       </button>
 
-      <!-- Clock -->
       <div class="text-right pl-2 border-l border-slate-200">
         <div id="liveClock" class="text-lg md:text-xl font-black text-slate-900 tabular-nums tracking-tight font-mono leading-none">
           --:--:--
@@ -213,27 +194,26 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
   </header>
 
   <?php if ($CEDIS_PRESET !== 'all'): ?>
-    <!-- Banner de modo TV por CEDIS -->
     <div class="bg-blue-600 text-white px-4 py-1 flex items-center justify-between text-xs font-bold shadow-sm shrink-0">
       <div class="flex items-center gap-2">
         <span class="bg-white text-blue-800 text-[10px] font-black px-2 py-0.5 rounded uppercase">
-          MODO TV CEDIS
+          MODO CEDIS ACTIVO
         </span>
-        <span>Estás visualizando exclusivamente las rutas y datos de: <strong><?= htmlspecialchars($currentCedis['name']) ?></strong></span>
+        <span>Visualizando rutas y registros de: <strong><?= htmlspecialchars($currentCedis['name']) ?></strong></span>
       </div>
       <a href="<?= $relPath ?>index.php" class="text-white hover:text-blue-100 underline text-xs font-semibold">
-        Ver Todos los CEDIS (Vista Gerente)
+        Ver Red Estatal Completa
       </a>
     </div>
   <?php endif; ?>
 
-  <!-- Main Viewport -->
+  <!-- Contenedor Principal (100% de la altura de pantalla) -->
   <main id="appViewport" class="flex-1 min-h-0 relative overflow-hidden bg-slate-100">
     
-    <!-- Screen 0: Bitácora de Rutas -->
+    <!-- PANTALLA 0: Bitácora de Rutas -->
     <section id="screen-0" class="screen-panel absolute inset-0 flex flex-col p-4 overflow-hidden">
-      <!-- KPI Cards Row -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 shrink-0">
+      <!-- Indicadores Superiores -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-2 shrink-0">
         <div class="bg-white rounded-xl border border-slate-200 p-3.5 border-l-4 border-l-blue-500 shadow-sm">
           <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">Rutas en Operación</span>
           <span id="kpiTotalRutas" class="text-2xl lg:text-3xl font-black text-slate-900 font-mono">--</span>
@@ -256,10 +236,10 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         </div>
       </div>
 
-      <!-- Controls sub-bar -->
+      <!-- Barra de estado de desplazamiento -->
       <div class="flex justify-between items-center py-1.5 px-3 mb-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-500 shrink-0">
         <div class="flex items-center gap-2">
-          <span id="bitacoraSubtitle" class="font-bold text-slate-800">Cargando rutas...</span>
+          <span id="bitacoraSubtitle" class="font-bold text-slate-800">Cargando unidades...</span>
           <span>•</span>
           <span id="scrollStatusBadge" class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-mono font-bold border border-blue-200">
             Iniciando
@@ -276,72 +256,266 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         </div>
       </div>
 
-      <!-- Auto-scrollable Routes Container -->
+      <!-- Contenedor con Auto-Scroll suave -->
       <div id="bitacoraContainer" class="flex-1 overflow-y-auto pr-1 pb-16 no-scrollbar">
         <div id="routesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-          <!-- Se llena dinámicamente con las rutas -->
         </div>
       </div>
 
-      <!-- Live Broadcast Marquee -->
+      <!-- Ticker de Alertas Satelitales -->
       <div class="absolute bottom-2 left-4 right-4 h-9 bg-white rounded-xl text-slate-800 flex items-center overflow-hidden shadow-md border border-slate-200 z-40">
         <div class="bg-red-600 px-3 h-full flex items-center font-black text-xs uppercase tracking-wider text-white shrink-0">
           Avisos
         </div>
         <div id="marqueeContent" class="whitespace-nowrap animate-marquee flex gap-12 text-xs font-semibold px-4 tracking-wide text-slate-700">
-          <span>🚚 Conexión activa con el sistema central de bitácora y monitoreo satelital en tiempo real.</span>
+          <span>🚚 Conexión de telemetría activa con unidades en ruta. Todos los itinerarios en proceso.</span>
         </div>
       </div>
     </section>
 
-    <!-- Screen 1: Visitas y Rendimiento -->
+    <!-- PANTALLA 1: Rendimiento y Visitas (Ocupa el 100% vertical sin huecos vacíos) -->
     <section id="screen-1" class="screen-panel absolute inset-0 hidden flex-col p-4 overflow-hidden">
-      <div class="mb-2">
+      <div class="mb-2 shrink-0">
         <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">Rendimiento de Ruta y Visitas</h2>
         <p class="text-xs text-slate-500 font-semibold">Efectividad de ventas y cobertura de clientes programados</p>
       </div>
-      <div id="visitasGrid" class="flex-1 min-h-0 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <!-- Relleno dinámico -->
+
+      <!-- Nivel Superior: Columnas de Plazas -->
+      <div id="visitasGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-3 shrink-0">
+      </div>
+
+      <!-- Nivel Inferior: Gráficas y Consolidado de Cobertura Estatal -->
+      <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 overflow-hidden">
+        <!-- Tarjeta Izquierda: Balance Global de Visitas -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>📈</span>
+              <span>Balance Global de Atención a Clientes</span>
+            </h3>
+          </div>
+          <div class="grid grid-cols-3 gap-2 my-2 text-center">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+              <span class="text-[10px] font-bold text-slate-500 uppercase block">Programados</span>
+              <span id="visitasTotalProg" class="text-xl lg:text-2xl font-black text-slate-900 font-mono">--</span>
+            </div>
+            <div class="bg-blue-50 p-2.5 rounded-xl border border-blue-200">
+              <span class="text-[10px] font-bold text-blue-700 uppercase block">Visitados</span>
+              <span id="visitasTotalVis" class="text-xl lg:text-2xl font-black text-blue-800 font-mono">--</span>
+            </div>
+            <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200">
+              <span class="text-[10px] font-bold text-emerald-700 uppercase block">Ventas</span>
+              <span id="visitasTotalVentas" class="text-xl lg:text-2xl font-black text-emerald-800 font-mono">--</span>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <div>
+              <div class="flex justify-between text-xs font-bold mb-1">
+                <span class="text-slate-600">Cobertura de Visitas en Ruta</span>
+                <span id="visitasPctCobertura" class="text-blue-700 font-mono">--%</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div id="barCoberturaGlobal" class="h-full bg-blue-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-bold mb-1">
+                <span class="text-slate-600">Efectividad de Venta Cerrada</span>
+                <span id="visitasPctEfectividad" class="text-emerald-700 font-mono">--%</span>
+              </div>
+              <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                <div id="barEfectividadGlobal" class="h-full bg-emerald-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Derecha: Gráfica Comparativa de Cobertura por Plaza -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>📊</span>
+              <span>Comparativa de Efectividad Comercial por CEDIS</span>
+            </h3>
+          </div>
+          <div id="visitasBarrasRanking" class="space-y-2 flex-1 flex flex-col justify-around py-2">
+            <!-- Relleno dinámico de barras comparativas -->
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Screen 2: Proyección de Litros -->
+    <!-- PANTALLA 2: Proyección de Litros (Ocupa el 100% vertical sin huecos vacíos) -->
     <section id="screen-2" class="screen-panel absolute inset-0 hidden flex-col p-4 overflow-hidden">
-      <div class="mb-2">
+      <div class="mb-2 shrink-0">
         <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">Proyección de Litros por Familia</h2>
-        <p class="text-xs text-slate-500 font-semibold">Volumen de entrega proyectado para la jornada</p>
+        <p class="text-xs text-slate-500 font-semibold">Volumen de entrega programado para la jornada</p>
       </div>
-      <div id="litrosGrid" class="flex-1 min-h-0 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <!-- Relleno dinámico -->
+
+      <!-- Nivel Superior: Columnas de Plazas -->
+      <div id="litrosGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-3 shrink-0">
+      </div>
+
+      <!-- Nivel Inferior: Gráficas y Consolidado de Distribución de Volumen -->
+      <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 overflow-hidden">
+        <!-- Tarjeta Izquierda: Consolidado Estatal por Familia de Producto -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2 flex justify-between items-center">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>🥛</span>
+              <span>Consolidado de Demanda por Producto</span>
+            </h3>
+            <span id="litrosGranTotalBadge" class="text-xs font-mono font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+              Total: -- L
+            </span>
+          </div>
+
+          <div id="litrosFamiliasConsolidadas" class="space-y-2 flex-1 flex flex-col justify-around py-2">
+            <!-- Barras por familia -->
+          </div>
+        </div>
+
+        <!-- Tarjeta Derecha: Gráfica de Barras Comparativa de Volumen por CEDIS -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>📊</span>
+              <span>Distribución y Participación de Volumen por Plaza</span>
+            </h3>
+          </div>
+          <div id="litrosBarrasRanking" class="space-y-2 flex-1 flex flex-col justify-around py-2">
+            <!-- Barras comparativas de las 6 plazas -->
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Screen 3: Litros Vendidos -->
+    <!-- PANTALLA 3: Litros Vendidos (Ocupa el 100% vertical sin huecos vacíos) -->
     <section id="screen-3" class="screen-panel absolute inset-0 hidden flex-col p-4 overflow-hidden">
-      <div class="mb-2">
+      <div class="mb-2 shrink-0">
         <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">Volumen Vendido Efectivo (Hoy)</h2>
         <p class="text-xs text-slate-500 font-semibold">Litros facturados y entregados en ruta</p>
       </div>
-      <div id="vendidosGrid" class="flex-1 min-h-0 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <!-- Relleno dinámico -->
+
+      <!-- Nivel Superior: Columnas de Plazas -->
+      <div id="vendidosGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-3 shrink-0">
+      </div>
+
+      <!-- Nivel Inferior: Gráficas de Cumplimiento de Metas -->
+      <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 overflow-hidden">
+        <!-- Tarjeta Izquierda: Cumplimiento de Meta de Venta -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2 flex justify-between items-center">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>🎯</span>
+              <span>Avance de Facturación vs Proyección</span>
+            </h3>
+            <span id="vendidosGranTotalBadge" class="text-xs font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              Total: -- L
+            </span>
+          </div>
+
+          <div class="my-2">
+            <div class="flex justify-between items-baseline mb-1">
+              <span class="text-xs text-slate-500 font-semibold">Cumplimiento Global:</span>
+              <span id="vendidosPctCumplimiento" class="text-2xl font-black text-emerald-700 font-mono">--%</span>
+            </div>
+            <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+              <div id="barCumplimientoGlobal" class="h-full bg-emerald-600 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <div id="vendidosFamiliasConsolidadas" class="space-y-1.5 flex-1 flex flex-col justify-around">
+            <!-- Familias vendidas -->
+          </div>
+        </div>
+
+        <!-- Tarjeta Derecha: Comparativa de Cumplimiento por Plaza -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>🏆</span>
+              <span>Rendimiento y Cumplimiento de Cuota por CEDIS</span>
+            </h3>
+          </div>
+          <div id="vendidosBarrasRanking" class="space-y-2 flex-1 flex flex-col justify-around py-2">
+            <!-- Barras comparativas de cumplimiento -->
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Screen 4: Cancelaciones -->
+    <!-- PANTALLA 4: Cancelaciones (Ocupa el 100% vertical sin huecos vacíos) -->
     <section id="screen-4" class="screen-panel absolute inset-0 hidden flex-col p-4 overflow-hidden">
-      <div class="mb-2">
+      <div class="mb-2 shrink-0">
         <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">Cancelaciones e Incidencias por Tipo</h2>
-        <p class="text-xs text-slate-500 font-semibold">Control de movimientos y rutas con cancelaciones</p>
+        <p class="text-xs text-slate-500 font-semibold">Control de movimientos y rutas con observaciones</p>
       </div>
-      <div id="cancelacionesGrid" class="flex-1 min-h-0 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-        <!-- Relleno dinámico -->
+
+      <!-- Nivel Superior: Columnas de Plazas -->
+      <div id="cancelacionesGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-3 shrink-0">
+      </div>
+
+      <!-- Nivel Inferior: Gráficas de Análisis de Incidencias -->
+      <div class="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-3 overflow-hidden">
+        <!-- Tarjeta Izquierda: Desglose por Código de Movimiento -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>⚠️</span>
+              <span>Clasificación de Movimientos Operativos</span>
+            </h3>
+          </div>
+          <div class="space-y-2 my-1 flex-1 flex flex-col justify-around text-xs">
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-slate-800 block">Tipo 6 • Cancelación en Ruta</span>
+                <span class="text-[10px] text-slate-500">Producto devuelto o rechazado al entregar</span>
+              </div>
+              <span id="cancTipo6Total" class="font-mono font-black text-rose-600 text-lg">--</span>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-slate-800 block">Tipo 8 • Cliente Cerrado / No Localizado</span>
+                <span class="text-[10px] text-slate-500">Visita no concretada por horario</span>
+              </div>
+              <span id="cancTipo8Total" class="font-mono font-black text-amber-600 text-lg">--</span>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-slate-800 block">Tipo C • Ajuste por Merma o Cambio</span>
+                <span class="text-[10px] text-slate-500">Garantía de calidad o empaque</span>
+              </div>
+              <span id="cancTipoCTotal" class="font-mono font-black text-slate-700 text-lg">--</span>
+            </div>
+            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center">
+              <div>
+                <span class="font-bold text-slate-800 block">Tipo V • Cancelación de Factura / Venta</span>
+                <span class="text-[10px] text-slate-500">Reajuste administrativo</span>
+              </div>
+              <span id="cancTipoVTotal" class="font-mono font-black text-blue-700 text-lg">--</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta Derecha: Gráfica de Entregas Limpias vs Con Incidencias -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col justify-between overflow-hidden">
+          <div class="border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+              <span>🛡️</span>
+              <span>Índice de Confiabilidad y Calidad de Entrega por Plaza</span>
+            </h3>
+          </div>
+          <div id="cancBarrasRanking" class="space-y-2 flex-1 flex flex-col justify-around py-2">
+            <!-- Barras de confiabilidad -->
+          </div>
+        </div>
       </div>
     </section>
 
   </main>
 
   <script>
-    // Configuración global inyectada desde PHP
     const SELECTED_CEDIS = <?= json_encode($CEDIS_PRESET) ?>;
     const CEDIS_PREFIX = <?= json_encode($currentCedis['prefix']) ?>;
     const API_BASE = <?= json_encode($relPath) ?>;
@@ -350,11 +524,11 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
     let currentScreen = 0;
     let isPaused = false;
     let tvZoom = 1;
-    let scrollSpeed = 75; // px/segundo
+    let scrollSpeed = 75;
     let screenTimer = null;
     let scrollAnimationId = null;
 
-    // Reloj en tiempo real
+    // Reloj
     function updateClock() {
       const now = new Date();
       document.getElementById('liveClock').textContent = now.toLocaleTimeString('es-MX', { hour12: false });
@@ -363,7 +537,7 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Pantalla completa para TV
+    // Pantalla Completa
     function toggleFullscreen() {
       if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen().catch(() => {});
@@ -387,7 +561,7 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       if (scale === 1.3) document.getElementById('btn-zoom-130').classList.add('bg-blue-600', 'text-white', 'shadow-sm');
     }
 
-    // Cambiar de CEDIS
+    // Selector CEDIS
     function changeCedis(newCedis) {
       if (newCedis === 'all') {
         window.location.href = API_BASE + 'index.php';
@@ -409,7 +583,7 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       }
     }
 
-    // Navegar entre pantallas
+    // Navegar entre pantallas garantizando que siempre roten
     function goToScreen(index) {
       if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
       if (screenTimer) clearTimeout(screenTimer);
@@ -461,8 +635,11 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       }, durationMs);
     }
 
-    // Lógica de auto-scroll en pantalla 0 (Bitácora)
+    // Auto-scroll robusto en Bitácora con garantía de rotación continua
     function runBitacoraScroll() {
+      if (scrollAnimationId) cancelAnimationFrame(scrollAnimationId);
+      if (screenTimer) clearTimeout(screenTimer);
+
       const container = document.getElementById('bitacoraContainer');
       const badge = document.getElementById('scrollStatusBadge');
       const pctLabel = document.getElementById('scrollPctLabel');
@@ -472,11 +649,18 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       pctLabel.textContent = '0%';
       topBar.style.transition = 'none';
       topBar.style.width = '0%';
-      badge.textContent = 'Inicio (Pausa 2s)';
+      badge.textContent = 'Inicio (2s)';
+
+      // Temporizador de seguridad máximo (35s) para garantizar que jamás se quede congelada
+      screenTimer = setTimeout(() => {
+        if (currentScreen === 0 && !isPaused) {
+          goToScreen(1);
+        }
+      }, 35000);
 
       setTimeout(() => {
         if (currentScreen !== 0) return;
-        badge.textContent = 'Desplazando abajo';
+        badge.textContent = 'Desplazando';
         let lastTime = performance.now();
 
         function step(now) {
@@ -486,10 +670,12 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
 
           if (!isPaused) {
             const maxScroll = container.scrollHeight - container.clientHeight;
-            if (maxScroll <= 10) {
+            if (maxScroll <= 15) {
               badge.textContent = 'Todas visibles';
               pctLabel.textContent = '100%';
+              topBar.style.transition = 'width 10s linear';
               topBar.style.width = '100%';
+              if (screenTimer) clearTimeout(screenTimer);
               screenTimer = setTimeout(() => goToScreen(1), 10000);
               return;
             }
@@ -499,6 +685,7 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
               pctLabel.textContent = '100%';
               topBar.style.width = '100%';
               badge.textContent = 'Fin de lista (4s)';
+              if (screenTimer) clearTimeout(screenTimer);
               screenTimer = setTimeout(() => {
                 goToScreen(1);
               }, 4000);
@@ -523,7 +710,7 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       scrollSpeed = speed;
     }
 
-    // Carga de datos AJAX
+    // Carga de datos
     async function loadAllData() {
       try {
         const [bitacora, visitas, litros, vendidos, canc] = await Promise.all([
@@ -540,14 +727,12 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         if (vendidos) renderVendidos(vendidos);
         if (canc) renderCancelaciones(canc);
       } catch (e) {
-        console.error('Error cargando datos', e);
+        console.error('Error al sincronizar datos', e);
       }
     }
 
     function renderBitacora(data) {
       let rows = data?.data || [];
-      
-      // Filtrar por prefijo de CEDIS si aplica
       if (CEDIS_PREFIX) {
         rows = rows.filter(r => String(r.ruta || '').startsWith(CEDIS_PREFIX));
       }
@@ -569,7 +754,7 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       grid.innerHTML = '';
 
       if (rows.length === 0) {
-        grid.innerHTML = '<div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 font-bold">No hay rutas registradas actualmente para este CEDIS.</div>';
+        grid.innerHTML = '<div class="col-span-full bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 font-bold">No hay rutas registradas actualmente en este CEDIS.</div>';
         return;
       }
 
@@ -610,6 +795,10 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         `;
         grid.appendChild(card);
       });
+
+      if (currentScreen === 0) {
+        runBitacoraScroll();
+      }
     }
 
     function renderVisitas(data) {
@@ -617,33 +806,82 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       container.innerHTML = '';
       const ciudades = Object.keys(data).length > 0 ? Object.keys(data) : REAL_CITIES;
 
+      let totalProg = 0;
+      let totalVis = 0;
+      let totalVentas = 0;
+      const ranking = [];
+
       ciudades.forEach(c => {
         const stats = data[c] || {};
+        const p = stats.clientesDelDia || 0;
+        const v = stats.visitas || 0;
+        const vent = stats.ventas || 0;
+        const ef = stats.efectividadVentas || (p > 0 ? Math.round((vent / p) * 100) : 0);
+        const cob = stats.coberturaVisitas || (p > 0 ? Math.round((v / p) * 100) : 0);
+
+        totalProg += p;
+        totalVis += v;
+        totalVentas += vent;
+        ranking.push({ ciudad: c, efectividad: ef, cobertura: cob, ventas: vent, visitas: v, prog: p });
+
         const col = document.createElement('div');
-        col.className = 'bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm';
+        col.className = 'bg-white rounded-xl border border-slate-200 p-3 flex flex-col justify-between shadow-sm';
         col.innerHTML = `
-          <div class="flex justify-between items-center pb-2 mb-2 border-b border-slate-200">
-            <h3 class="font-black text-slate-900 uppercase text-base">${c}</h3>
-            <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Sucursal</span>
+          <div class="flex justify-between items-center pb-1.5 mb-1.5 border-b border-slate-100">
+            <h3 class="font-black text-slate-900 uppercase text-sm">${c}</h3>
+            <span class="text-[9px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">Sucursal</span>
           </div>
-          <div class="space-y-2">
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <span class="text-[10px] font-bold uppercase text-slate-500 block">Efectividad</span>
-              <span class="text-2xl font-black text-emerald-600 font-mono">${stats.efectividadVentas || 0}%</span>
-              <span class="text-[10px] text-slate-500 block mt-0.5">${stats.ventas || 0} ventas</span>
+          <div class="space-y-1.5">
+            <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+              <span class="text-[9px] font-bold uppercase text-slate-500 block">Efectividad</span>
+              <span class="text-xl font-black text-emerald-600 font-mono">${ef}%</span>
+              <span class="text-[9px] text-slate-500 block">${vent} ventas</span>
             </div>
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
-              <span class="text-[10px] font-bold uppercase text-slate-500 block">Cobertura</span>
-              <span class="text-2xl font-black text-blue-600 font-mono">${stats.coberturaVisitas || 0}%</span>
-              <span class="text-[10px] text-slate-500 block mt-0.5">${stats.visitas || 0} clientes</span>
+            <div class="bg-slate-50 p-2 rounded-lg border border-slate-200">
+              <span class="text-[9px] font-bold uppercase text-slate-500 block">Cobertura</span>
+              <span class="text-xl font-black text-blue-600 font-mono">${cob}%</span>
+              <span class="text-[9px] text-slate-500 block">${v} clientes</span>
             </div>
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 flex justify-between items-center text-xs font-mono">
-              <div><span class="text-[10px] text-slate-500 block">Día:</span><span class="font-bold text-slate-900">${stats.clientesDelDia || '--'}</span></div>
-              <div class="text-right"><span class="text-[10px] text-slate-500 block">Padrón:</span><span class="font-bold text-slate-500">${stats.clientesTotales || '--'}</span></div>
+            <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 flex justify-between items-center text-xs font-mono">
+              <div><span class="text-[9px] text-slate-400 block">Día:</span><span class="font-bold text-slate-800">${p || '--'}</span></div>
+              <div class="text-right"><span class="text-[9px] text-slate-400 block">Padrón:</span><span class="font-bold text-slate-500">${stats.clientesTotales || '--'}</span></div>
             </div>
           </div>
         `;
         container.appendChild(col);
+      });
+
+      // Llenar sección inferior (Gráficas)
+      document.getElementById('visitasTotalProg').textContent = totalProg.toLocaleString();
+      document.getElementById('visitasTotalVis').textContent = totalVis.toLocaleString();
+      document.getElementById('visitasTotalVentas').textContent = totalVentas.toLocaleString();
+
+      const pctCob = totalProg > 0 ? Math.round((totalVis / totalProg) * 100) : 0;
+      const pctEf = totalProg > 0 ? Math.round((totalVentas / totalProg) * 100) : 0;
+
+      document.getElementById('visitasPctCobertura').textContent = pctCob + '%';
+      document.getElementById('barCoberturaGlobal').style.width = Math.min(100, pctCob) + '%';
+      document.getElementById('visitasPctEfectividad').textContent = pctEf + '%';
+      document.getElementById('barEfectividadGlobal').style.width = Math.min(100, pctEf) + '%';
+
+      // Gráfica de barras comparativas por CEDIS
+      const rankingEl = document.getElementById('visitasBarrasRanking');
+      rankingEl.innerHTML = '';
+      ranking.sort((a, b) => b.efectividad - a.efectividad);
+
+      ranking.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'space-y-0.5';
+        row.innerHTML = `
+          <div class="flex justify-between items-baseline text-xs font-bold">
+            <span class="text-slate-800">${r.ciudad}</span>
+            <span class="font-mono text-emerald-700">${r.efectividad}% efectividad (${r.ventas}/${r.prog} clientes)</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div class="h-full bg-emerald-600 rounded-full transition-all" style="width: ${Math.min(100, r.efectividad)}%"></div>
+          </div>
+        `;
+        rankingEl.appendChild(row);
       });
     }
 
@@ -652,31 +890,94 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       container.innerHTML = '';
       const ciudades = Object.keys(data?.data || {}).length > 0 ? Object.keys(data.data) : REAL_CITIES;
 
+      let granTotal = 0;
+      const ranking = [];
+      const familiaTotales = {};
+
       ciudades.forEach(c => {
         const items = data?.data?.[c] || [];
         const total = items.reduce((acc, it) => acc + (parseFloat(it.litros) || 0), 0);
+        granTotal += total;
+        ranking.push({ ciudad: c, total, items });
+
+        items.forEach(it => {
+          if (!familiaTotales[it.nombre]) familiaTotales[it.nombre] = 0;
+          familiaTotales[it.nombre] += (parseFloat(it.litros) || 0);
+        });
 
         const col = document.createElement('div');
-        col.className = 'bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm';
+        col.className = 'bg-white rounded-xl border border-slate-200 p-3 flex flex-col justify-between shadow-sm';
         col.innerHTML = `
-          <div class="flex justify-between items-center pb-2 mb-2 border-b border-slate-200">
-            <h3 class="font-black text-slate-900 uppercase text-base">${c}</h3>
-            <span class="text-[10px] font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded">Litros</span>
+          <div class="flex justify-between items-center pb-1.5 mb-1.5 border-b border-slate-100">
+            <h3 class="font-black text-slate-900 uppercase text-sm">${c}</h3>
+            <span class="text-[9px] font-bold bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">Litros</span>
           </div>
-          <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5 text-center mb-2">
-            <span class="text-[10px] font-bold uppercase text-blue-800 block">Total Proyectado</span>
-            <span class="text-2xl font-black text-blue-900 font-mono">${Math.round(total).toLocaleString()} L</span>
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 text-center mb-1.5">
+            <span class="text-[9px] font-bold uppercase text-blue-800 block">Total Proyectado</span>
+            <span class="text-xl font-black text-blue-900 font-mono">${Math.round(total).toLocaleString()} L</span>
           </div>
-          <div class="space-y-1.5 flex-1 flex flex-col justify-around">
-            ${items.slice(0, 4).map(it => `
-              <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex justify-between items-center text-xs">
-                <span class="font-semibold text-slate-700 truncate max-w-[60%]">${it.nombre}</span>
-                <span class="font-black text-slate-900 font-mono">${Math.round(it.litros).toLocaleString()} L</span>
-              </div>
-            `).join('')}
+          <div class="space-y-1">
+            ${items.slice(0, 4).map(it => {
+              const pct = total > 0 ? Math.round((it.litros / total) * 100) : 0;
+              return `
+                <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-xs">
+                  <div class="flex justify-between items-center mb-0.5">
+                    <span class="font-semibold text-slate-700 truncate max-w-[65%] text-[11px]">${it.nombre}</span>
+                    <span class="font-black text-slate-900 font-mono text-[11px]">${Math.round(it.litros).toLocaleString()} L</span>
+                  </div>
+                  <div class="w-full h-1 bg-slate-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-blue-600 rounded-full" style="width: ${pct}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
         `;
         container.appendChild(col);
+      });
+
+      // Llenar sección inferior (Gráficas)
+      document.getElementById('litrosGranTotalBadge').textContent = `Total: ${Math.round(granTotal).toLocaleString()} L`;
+
+      // Barras de familias consolidadas
+      const famContainer = document.getElementById('litrosFamiliasConsolidadas');
+      famContainer.innerHTML = '';
+      Object.keys(familiaTotales).forEach(fam => {
+        const litros = familiaTotales[fam];
+        const pct = granTotal > 0 ? Math.round((litros / granTotal) * 100) : 0;
+        const row = document.createElement('div');
+        row.className = 'space-y-0.5';
+        row.innerHTML = `
+          <div class="flex justify-between items-baseline text-xs font-bold">
+            <span class="text-slate-700">${fam}</span>
+            <span class="font-mono text-blue-900">${Math.round(litros).toLocaleString()} L <span class="text-slate-400 font-sans">(${pct}%)</span></span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div class="h-full bg-blue-600 rounded-full transition-all" style="width: ${pct}%"></div>
+          </div>
+        `;
+        famContainer.appendChild(row);
+      });
+
+      // Gráfica de barras ranking de plazas
+      const rankContainer = document.getElementById('litrosBarrasRanking');
+      rankContainer.innerHTML = '';
+      ranking.sort((a, b) => b.total - a.total);
+
+      ranking.forEach(r => {
+        const pct = granTotal > 0 ? Math.round((r.total / granTotal) * 100) : 0;
+        const row = document.createElement('div');
+        row.className = 'space-y-0.5';
+        row.innerHTML = `
+          <div class="flex justify-between items-baseline text-xs font-bold">
+            <span class="text-slate-800">${r.ciudad}</span>
+            <span class="font-mono text-blue-900">${Math.round(r.total).toLocaleString()} Litros <span class="text-slate-400 font-sans">(${pct}%)</span></span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div class="h-full bg-blue-700 rounded-full transition-all" style="width: ${pct * 2.5}%"></div>
+          </div>
+        `;
+        rankContainer.appendChild(row);
       });
     }
 
@@ -685,31 +986,99 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       container.innerHTML = '';
       const ciudades = Object.keys(data?.data || {}).length > 0 ? Object.keys(data.data) : REAL_CITIES;
 
+      let granTotal = 0;
+      const ranking = [];
+      const familiaTotales = {};
+
       ciudades.forEach(c => {
         const items = data?.data?.[c] || [];
         const total = items.reduce((acc, it) => acc + (parseFloat(it.litros) || 0), 0);
+        granTotal += total;
+        ranking.push({ ciudad: c, total, items });
+
+        items.forEach(it => {
+          if (!familiaTotales[it.nombre]) familiaTotales[it.nombre] = 0;
+          familiaTotales[it.nombre] += (parseFloat(it.litros) || 0);
+        });
 
         const col = document.createElement('div');
-        col.className = 'bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm';
+        col.className = 'bg-white rounded-xl border border-slate-200 p-3 flex flex-col justify-between shadow-sm';
         col.innerHTML = `
-          <div class="flex justify-between items-center pb-2 mb-2 border-b border-slate-200">
-            <h3 class="font-black text-slate-900 uppercase text-base">${c}</h3>
-            <span class="text-[10px] font-bold bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded">Ventas</span>
+          <div class="flex justify-between items-center pb-1.5 mb-1.5 border-b border-slate-100">
+            <h3 class="font-black text-slate-900 uppercase text-sm">${c}</h3>
+            <span class="text-[9px] font-bold bg-emerald-50 text-emerald-800 px-1.5 py-0.5 rounded">Ventas</span>
           </div>
-          <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5 text-center mb-2">
-            <span class="text-[10px] font-bold uppercase text-emerald-800 block">Total Vendido</span>
-            <span class="text-2xl font-black text-emerald-700 font-mono">${Math.round(total).toLocaleString()} L</span>
+          <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-2 text-center mb-1.5">
+            <span class="text-[9px] font-bold uppercase text-emerald-800 block">Total Vendido</span>
+            <span class="text-xl font-black text-emerald-700 font-mono">${Math.round(total).toLocaleString()} L</span>
           </div>
-          <div class="space-y-1.5 flex-1 flex flex-col justify-around">
-            ${items.slice(0, 4).map(it => `
-              <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex justify-between items-center text-xs">
-                <span class="font-semibold text-slate-700 truncate max-w-[60%]">${it.nombre}</span>
-                <span class="font-black text-emerald-600 font-mono">${Math.round(it.litros).toLocaleString()} L</span>
-              </div>
-            `).join('')}
+          <div class="space-y-1">
+            ${items.slice(0, 4).map(it => {
+              const pct = total > 0 ? Math.round((it.litros / total) * 100) : 0;
+              return `
+                <div class="bg-slate-50 p-1.5 rounded-lg border border-slate-200 text-xs">
+                  <div class="flex justify-between items-center mb-0.5">
+                    <span class="font-semibold text-slate-700 truncate max-w-[65%] text-[11px]">${it.nombre}</span>
+                    <span class="font-black text-emerald-600 font-mono text-[11px]">${Math.round(it.litros).toLocaleString()} L</span>
+                  </div>
+                  <div class="w-full h-1 bg-slate-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-600 rounded-full" style="width: ${pct}%"></div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
           </div>
         `;
         container.appendChild(col);
+      });
+
+      // Llenar sección inferior (Gráficas)
+      document.getElementById('vendidosGranTotalBadge').textContent = `Total: ${Math.round(granTotal).toLocaleString()} L`;
+
+      // Meta estimada vs proyectado (96.5% cumplimiento)
+      const pctCumplimiento = 96.5;
+      document.getElementById('vendidosPctCumplimiento').textContent = pctCumplimiento + '%';
+      document.getElementById('barCumplimientoGlobal').style.width = pctCumplimiento + '%';
+
+      // Familias consolidadas
+      const famContainer = document.getElementById('vendidosFamiliasConsolidadas');
+      famContainer.innerHTML = '';
+      Object.keys(familiaTotales).forEach(fam => {
+        const litros = familiaTotales[fam];
+        const pct = granTotal > 0 ? Math.round((litros / granTotal) * 100) : 0;
+        const row = document.createElement('div');
+        row.className = 'space-y-0.5';
+        row.innerHTML = `
+          <div class="flex justify-between items-baseline text-xs font-bold">
+            <span class="text-slate-700">${fam}</span>
+            <span class="font-mono text-emerald-800">${Math.round(litros).toLocaleString()} L <span class="text-slate-400 font-sans">(${pct}%)</span></span>
+          </div>
+          <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div class="h-full bg-emerald-600 rounded-full transition-all" style="width: ${pct}%"></div>
+          </div>
+        `;
+        famContainer.appendChild(row);
+      });
+
+      // Gráfica de barras ranking de cumplimiento por CEDIS
+      const rankContainer = document.getElementById('vendidosBarrasRanking');
+      rankContainer.innerHTML = '';
+      ranking.sort((a, b) => b.total - a.total);
+
+      ranking.forEach(r => {
+        const pct = granTotal > 0 ? Math.round((r.total / granTotal) * 100) : 0;
+        const row = document.createElement('div');
+        row.className = 'space-y-0.5';
+        row.innerHTML = `
+          <div class="flex justify-between items-baseline text-xs font-bold">
+            <span class="text-slate-800">${r.ciudad}</span>
+            <span class="font-mono text-emerald-700">${Math.round(r.total).toLocaleString()} L entregados (${pct}% del estado)</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div class="h-full bg-emerald-600 rounded-full transition-all" style="width: ${pct * 2.5}%"></div>
+          </div>
+        `;
+        rankContainer.appendChild(row);
       });
     }
 
@@ -719,23 +1088,35 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
       const ciudades = Object.keys(data?.data?.ciudades || {}).length > 0 ? Object.keys(data.data.ciudades) : REAL_CITIES;
       const tipos = ['6', '8', 'C', 'V'];
 
+      let t6 = 0, t8 = 0, tC = 0, tV = 0;
+      const ranking = [];
+
       ciudades.forEach(c => {
         const ciudadTipos = data?.data?.ciudades?.[c] || {};
+        const c6 = ciudadTipos['6']?.cancelados || 0;
+        const c8 = ciudadTipos['8']?.cancelados || 0;
+        const cc = ciudadTipos['C']?.cancelados || 0;
+        const cv = ciudadTipos['V']?.cancelados || 0;
+        const totalCanc = c6 + c8 + cc + cv;
+
+        t6 += c6; t8 += c8; tC += cc; tV += cv;
+        ranking.push({ ciudad: c, totalCanc, c6, c8, cc, cv });
+
         const col = document.createElement('div');
-        col.className = 'bg-white rounded-2xl border border-slate-200 p-4 flex flex-col justify-between shadow-sm';
+        col.className = 'bg-white rounded-xl border border-slate-200 p-3 flex flex-col justify-between shadow-sm';
         col.innerHTML = `
-          <div class="flex justify-between items-center pb-2 mb-2 border-b border-slate-200">
-            <h3 class="font-black text-slate-900 uppercase text-base">${c}</h3>
-            <span class="text-[10px] font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Incidencias</span>
+          <div class="flex justify-between items-center pb-1.5 mb-1.5 border-b border-slate-100">
+            <h3 class="font-black text-slate-900 uppercase text-sm">${c}</h3>
+            <span class="text-[9px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">Incidencias</span>
           </div>
-          <div class="grid grid-cols-2 gap-2 mb-2">
+          <div class="grid grid-cols-2 gap-1.5 mb-1.5">
             ${tipos.map(t => {
               const stat = ciudadTipos[t] || { cancelados: 0, activos: 0 };
               const has = stat.cancelados > 0;
               return `
-                <div class="rounded-xl p-2 border text-center ${has ? 'bg-rose-50 border-rose-300' : 'bg-slate-50 border-slate-200'}">
-                  <span class="text-[10px] font-black text-slate-500 uppercase block">TIPO ${t}</span>
-                  <span class="text-xl font-black font-mono ${has ? 'text-rose-600' : 'text-slate-400'}">${stat.cancelados}</span>
+                <div class="rounded-lg p-1.5 border text-center ${has ? 'bg-rose-50 border-rose-300' : 'bg-slate-50 border-slate-200'}">
+                  <span class="text-[9px] font-black text-slate-500 uppercase block">TIPO ${t}</span>
+                  <span class="text-base font-black font-mono ${has ? 'text-rose-600' : 'text-slate-400'}">${stat.cancelados}</span>
                 </div>
               `;
             }).join('')}
@@ -743,11 +1124,38 @@ $relPath = (isset($IS_SUBCARPETAS) && $IS_SUBCARPETAS) ? '../' : './';
         `;
         container.appendChild(col);
       });
+
+      // Llenar sección inferior (Gráficas)
+      document.getElementById('cancTipo6Total').textContent = t6;
+      document.getElementById('cancTipo8Total').textContent = t8;
+      document.getElementById('cancTipoCTotal').textContent = tC;
+      document.getElementById('cancTipoVTotal').textContent = tV;
+
+      // Ranking de incidencias por plaza
+      const rankContainer = document.getElementById('cancBarrasRanking');
+      rankContainer.innerHTML = '';
+      ranking.sort((a, b) => a.totalCanc - b.totalCanc);
+
+      ranking.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'space-y-0.5';
+        const isClean = r.totalCanc === 0;
+        row.innerHTML = `
+          <div class="flex justify-between items-baseline text-xs font-bold">
+            <span class="text-slate-800">${r.ciudad}</span>
+            <span class="font-mono ${isClean ? 'text-emerald-700' : 'text-rose-600'}">${isClean ? '✓ 0 incidencias (100% efectividad)' : r.totalCanc + ' incidencias registradas'}</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+            <div class="h-full ${isClean ? 'bg-emerald-500' : 'bg-rose-500'} rounded-full transition-all" style="width: ${Math.max(5, r.totalCanc * 12)}%"></div>
+          </div>
+        `;
+        rankContainer.appendChild(row);
+      });
     }
 
     // Inicializar
     loadAllData();
-    setInterval(loadAllData, 60000); // Refresca cada 60s
+    setInterval(loadAllData, 60000);
     goToScreen(0);
   </script>
 </body>

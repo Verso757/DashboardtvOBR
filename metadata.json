@@ -1,0 +1,8 @@
+{
+  "name": "Yaqui TV Dashboard",
+  "description": "Tablero de monitoreo de rutas, visitas, litros y bitácora en tiempo real.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
